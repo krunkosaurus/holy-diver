@@ -4,9 +4,83 @@
 		<title>Transform</title>
 		<script src="bower_components/underscore/underscore.js"></script>
 		<script>
-			!function(){
-				console.log('here');
-			}();
+			!function(context){
+				
+				context['data'] = {
+					timeframe: { 
+						start: "2014-01-12T07:00:00.000Z", 
+						end: "2014-01-19T07:00:00.000Z" 
+					},
+					value: [
+					{
+						page: 'home',
+						result: 20
+					},
+					{
+						page: 'contact',
+						result: 14
+					},
+					{
+						page: 'about',
+						result: 5
+					}
+					]
+				};
+				
+				context['config'] = {
+					header: {
+						column: ['interval'],
+						columns: parse(context['data'], 'value', 'page')
+					},
+					rows: {
+						cell: parse(context['data'], 'timeframe', 'start'),
+						cells: parse(context['data'], 'value', 'result')
+					}
+				}
+				
+				function parse() {
+					var result = [];
+					var loop = function() {
+						var root = arguments[0];
+						var args = Array.prototype.slice.call(arguments, 1);
+						var target = args.pop();
+					
+						_.each(args, function(el, index, list){
+							if (root[el] instanceof Array) {
+								return loop.apply(this, _.union([root], root[el], [target]));
+								
+							} else if (_.isObject(root[el])) {
+								if (root[el][target]) {
+									result.push(root[el][target]);
+								}
+								
+							} else {
+								if (_.isObject(el) && _.has(el, target)) {
+									result.push(el[target]);
+								}
+							}
+						});
+						if (result.length > 0) {
+							return result;
+						}
+					}
+					return loop.apply(this, arguments);
+				}
+				
+				
+				context['table'] = [
+					_.union(
+						context['config'].header.column,
+						context['config'].header.columns
+					), 
+					_.union(
+						context['config'].rows.cell, 
+						context['config'].rows.cells
+					)
+				];
+				
+				
+			}(this);
 		</script>
 	</head>
 	<body>
