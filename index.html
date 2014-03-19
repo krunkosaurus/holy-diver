@@ -65,7 +65,6 @@
 								result.push(el[target]);
 								
 							} else if (root[el]){
-								// dive down a level
 								
 								if (root[el] instanceof Array) {
 									// dive through each array item
@@ -80,108 +79,20 @@
 										result.push(root[el][target]);
 										
 									} else {
-										// dive down a level
+										// dive down a level!
 										return loop.apply(this, [root[el]].concat(args.splice(1)).concat(target));
 										
 									}
 								}
 								
 							} else {
-								// dive down a level
+								// dive down a level!
 								return loop.apply(this, [el].concat(args.splice(1)).concat(target));
 								
 							}
 							
 							return; 
-							
-							
-							if (root[el]) {
-								if (root[el] instanceof Array) {
-									var new_root = [root[el]];
-									var new_args = root[el].concat(args.slice(1));
-									_.each(root[el], function(n, i){
-										//console.log(root[el][i], target);
-										return loop.apply(this, [root[el][i]].concat(new_args).concat(target));
-									});
-									//return loop.apply(this, new_root.concat(new_args).concat(target));
-									
-									//console.log(new_args);
-									//return loop.apply(this, [root[el]].concat(args.slice(1)).concat(target));
-								} else if (typeof root[el] == 'object') {
-									console.log(_.has(root[el], target));
-									result.push(root[el][target]);
-									//return loop.apply(this, [root[el]].concat(args.slice(1)).concat(target));
-									//console.log('object!', root[el])
-								}
-								
-								/* else if (_.has(root[el], target)) {
-									result.push(root[el][target]);
-								} else {
-									console.log('fuck');
-								}*/
-								
-							} else {
-								if (_.has(el, target)){
-									result.push(el[target]);
-								} else {
-									//console.log(root, args, target)
-									//console.log(el, index, list, target);
-								}
-								//return loop.apply(this, _.union([root[list[0]]], [list[index]], [target]));
-								
-								/*
-								console.log(root, target);
-								console.log(root[list[0]], list[index]);*/
-							}
-							
-							return;
-							
-							
-							//if (root[el] instanceof Array) {
-								// /console.log(root[el], index, list)
-								
-								
-							//} else if (root[el] && _.has(root[el], target)) {
-							//	result.push(root[el][target]);
-								
-							//} else if (el[target]) {
-							//	result.push(el[target]);
-								
-							//} else {
-							//	console.log(root, el, index, target);
-								
-								//return loop.apply(this, _.union([root], root[el], [target]));
-								
-								//console.log(root, args, target, el, index, list);
-								
-								
-								
-								
-								/*
-								if (_.has(el, target)) {
-									result.push(el[target]);
-									//console.log('this HAZ the target', el);
-								} else {
-									return loop.apply(this, _.union([root], [root[el]], [target]));
-									console.log('this HAZ NOT the target', el);
-								}*/
-								//return loop.apply(this, _.union([root], _.keys(root[el]), [target]));
-								
-								
-								/*if (root[el][target]) {
-									result.push(root[el][target]);
-								} else {
-									console.log('object but not target');
-								}*/
-								
-							/* else {
-								console.log(root[el]);
-								if (_.isObject(el) && _.has(el, target)) {
-									result.push(el[target]);
-								} else {
-									console.log('object but not target', el);
-								}
-							}*/
+
 						});
 						if (result.length > 0) {
 							return result;
@@ -189,7 +100,6 @@
 					}
 					return loop.apply(this, arguments);
 				}
-				
 				
 				context['table'] = [
 					_.union(
@@ -202,9 +112,9 @@
 					)
 				];
 				
-				
-				
-				
+				console.log('Original JSON', context['data']);
+				console.log('Converted', context['config']);
+				console.log('Joined', context['table']);
 				
 			}(this);
 		</script>
