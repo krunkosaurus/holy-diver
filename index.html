@@ -1,125 +1,125 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Transform</title>
-		<script src="bower_components/underscore/underscore.js"></script>
-		<script>
-			!function(context){
-				
-				context['data'] = {
-					timeframe: { 
-						start: "2014-01-12T07:00:00.000Z", 
-						end: "2014-01-19T07:00:00.000Z" 
-					},
-					value: [
-						{
-							page: 'home',
-							result: {
-								number: {
-									value: 20
-								}
-							}
-						},
-						{
-							page: 'contact',
-							result: {
-								number: {
-									value: 14
-								}
-							}
-						},
-						{
-							page: 'about',
-							result: {
-								number: {
-									value: 5
-								}
-							}
-						}
-					]
-				};
-				
-				context['config'] = {
-					header: {
-						column: ['interval'],
-						columns: parse(context['data'], 'value', 'page')
-					},
-					rows: {
-						cell: parse(context['data'], 'timeframe', 'start'),
-						cells: parse(context['data'], 'value', 'result', 'number', 'value')
-					}
-				};
-				
-				function parse() {
-					var result = [];
-					var loop = function() {
-						var root = arguments[0];
-						var args = Array.prototype.slice.call(arguments, 1);
-						var target = args.pop();
-						//console.log('DIVE ' + target + ':', root, args);
-						
-						_.each(args, function(el, index, list){
-							
-							if (el[target]) {
-								// Easy grab!
-								result.push(el[target]);
-								
-							} else if (root[el]){
-								
-								if (root[el] instanceof Array) {
-									// dive through each array item
-									_.each(root[el], function(n, i) {
-										var splinter = [root[el]].concat(root[el][i]).concat(args.slice(1)).concat(target);
-										return loop.apply(this, splinter);
-									});
-									
-								} else {
-									if (root[el][target]) {
-										// grab it!
-										result.push(root[el][target]);
-										
-									} else {
-										// dive down a level!
-										return loop.apply(this, [root[el]].concat(args.splice(1)).concat(target));
-										
-									}
-								}
-								
-							} else {
-								// dive down a level!
-								return loop.apply(this, [el].concat(args.splice(1)).concat(target));
-								
-							}
-							
-							return; 
+<head>
+  <title>Transform</title>
+  <script src="bower_components/underscore/underscore.js"></script>
+  <script>
+    !function(context){
+      
+      context['data'] = {
+        timeframe: { 
+          start: "2014-01-12T07:00:00.000Z", 
+          end: "2014-01-19T07:00:00.000Z" 
+        },
+        value: [
+          {
+            page: 'home',
+            result: {
+              number: {
+                value: 20
+              }
+            }
+          },
+          {
+            page: 'contact',
+            result: {
+              number: {
+                value: 14
+              }
+            }
+          },
+          {
+            page: 'about',
+            result: {
+              number: {
+                value: 5
+              }
+            }
+          }
+        ]
+      };
+      
+      context['config'] = {
+        header: {
+          column: ['interval'],
+          columns: parse(context['data'], 'value', 'page')
+        },
+        rows: {
+          cell: parse(context['data'], 'timeframe', 'start'),
+          cells: parse(context['data'], 'value', 'result', 'number', 'value')
+        }
+      };
+      
+      function parse() {
+        var result = [];
+        var loop = function() {
+          var root = arguments[0];
+          var args = Array.prototype.slice.call(arguments, 1);
+          var target = args.pop();
+          //console.log('DIVE ' + target + ':', root, args);
+          
+          _.each(args, function(el, index, list){
+            
+            if (el[target]) {
+              // Easy grab!
+              result.push(el[target]);
+              
+            } else if (root[el]){
+              
+              if (root[el] instanceof Array) {
+                // dive through each array item
+                _.each(root[el], function(n, i) {
+                  var splinter = [root[el]].concat(root[el][i]).concat(args.slice(1)).concat(target);
+                  return loop.apply(this, splinter);
+                });
+                
+              } else {
+                if (root[el][target]) {
+                  // grab it!
+                  result.push(root[el][target]);
+                  
+                } else {
+                  // dive down a level!
+                  return loop.apply(this, [root[el]].concat(args.splice(1)).concat(target));
+                  
+                }
+              }
+              
+            } else {
+              // dive down a level!
+              return loop.apply(this, [el].concat(args.splice(1)).concat(target));
+              
+            }
+            
+            return; 
 
-						});
-						if (result.length > 0) {
-							return result;
-						}
-					}
-					return loop.apply(this, arguments);
-				}
-				
-				context['table'] = [
-					_.union(
-						context['config'].header.column,
-						context['config'].header.columns
-					), 
-					_.union(
-						context['config'].rows.cell, 
-						context['config'].rows.cells
-					)
-				];
-				
-				console.log('Original JSON', context['data']);
-				console.log('Converted', context['config']);
-				console.log('Joined', context['table']);
-				
-			}(this);
-		</script>
-	</head>
-	<body>
-		
-	</body>
+          });
+          if (result.length > 0) {
+            return result;
+          }
+        }
+        return loop.apply(this, arguments);
+      }
+      
+      context['table'] = [
+        _.union(
+          context['config'].header.column,
+          context['config'].header.columns
+        ), 
+        _.union(
+          context['config'].rows.cell, 
+          context['config'].rows.cells
+        )
+      ];
+      
+      console.log('Original JSON', context['data']);
+      console.log('Converted', context['config']);
+      console.log('Joined', context['table']);
+      
+    }(this);
+  </script>
+</head>
+<body>
+  
+</body>
 </html>
