@@ -12,18 +12,30 @@
 						end: "2014-01-19T07:00:00.000Z" 
 					},
 					value: [
-					{
-						page: 'home',
-						result: 20
-					},
-					{
-						page: 'contact',
-						result: 14
-					},
-					{
-						page: 'about',
-						result: 5
-					}
+						{
+							page: 'home',
+							result: {
+								number: {
+									value: 20
+								}
+							}
+						},
+						{
+							page: 'contact',
+							result: {
+								number: {
+									value: 14
+								}
+							}
+						},
+						{
+							page: 'about',
+							result: {
+								number: {
+									value: 5
+								}
+							}
+						}
 					]
 				};
 				
@@ -34,9 +46,9 @@
 					},
 					rows: {
 						cell: parse(context['data'], 'timeframe', 'start'),
-						cells: parse(context['data'], 'value', 'result')
+						cells: parse(context['data'], 'value', 'result', 'number', 'value')
 					}
-				}
+				};
 				
 				function parse() {
 					var result = [];
@@ -44,21 +56,132 @@
 						var root = arguments[0];
 						var args = Array.prototype.slice.call(arguments, 1);
 						var target = args.pop();
-					
+						//console.log('DIVE ' + target + ':', root, args);
+						
 						_.each(args, function(el, index, list){
-							if (root[el] instanceof Array) {
-								return loop.apply(this, _.union([root], root[el], [target]));
+							
+							if (el[target]) {
+								// Easy grab!
+								result.push(el[target]);
 								
-							} else if (_.isObject(root[el])) {
-								if (root[el][target]) {
-									result.push(root[el][target]);
+							} else if (root[el]){
+								// dive down a level
+								
+								if (root[el] instanceof Array) {
+									// dive through each array item
+									_.each(root[el], function(n, i) {
+										var splinter = [root[el]].concat(root[el][i]).concat(args.slice(1)).concat(target);
+										return loop.apply(this, splinter);
+									});
+									
+								} else {
+									if (root[el][target]) {
+										// grab it!
+										result.push(root[el][target]);
+										
+									} else {
+										// dive down a level
+										return loop.apply(this, [root[el]].concat(args.splice(1)).concat(target));
+										
+									}
 								}
 								
 							} else {
+								// dive down a level
+								return loop.apply(this, [el].concat(args.splice(1)).concat(target));
+								
+							}
+							
+							return; 
+							
+							
+							if (root[el]) {
+								if (root[el] instanceof Array) {
+									var new_root = [root[el]];
+									var new_args = root[el].concat(args.slice(1));
+									_.each(root[el], function(n, i){
+										//console.log(root[el][i], target);
+										return loop.apply(this, [root[el][i]].concat(new_args).concat(target));
+									});
+									//return loop.apply(this, new_root.concat(new_args).concat(target));
+									
+									//console.log(new_args);
+									//return loop.apply(this, [root[el]].concat(args.slice(1)).concat(target));
+								} else if (typeof root[el] == 'object') {
+									console.log(_.has(root[el], target));
+									result.push(root[el][target]);
+									//return loop.apply(this, [root[el]].concat(args.slice(1)).concat(target));
+									//console.log('object!', root[el])
+								}
+								
+								/* else if (_.has(root[el], target)) {
+									result.push(root[el][target]);
+								} else {
+									console.log('fuck');
+								}*/
+								
+							} else {
+								if (_.has(el, target)){
+									result.push(el[target]);
+								} else {
+									//console.log(root, args, target)
+									//console.log(el, index, list, target);
+								}
+								//return loop.apply(this, _.union([root[list[0]]], [list[index]], [target]));
+								
+								/*
+								console.log(root, target);
+								console.log(root[list[0]], list[index]);*/
+							}
+							
+							return;
+							
+							
+							//if (root[el] instanceof Array) {
+								// /console.log(root[el], index, list)
+								
+								
+							//} else if (root[el] && _.has(root[el], target)) {
+							//	result.push(root[el][target]);
+								
+							//} else if (el[target]) {
+							//	result.push(el[target]);
+								
+							//} else {
+							//	console.log(root, el, index, target);
+								
+								//return loop.apply(this, _.union([root], root[el], [target]));
+								
+								//console.log(root, args, target, el, index, list);
+								
+								
+								
+								
+								/*
+								if (_.has(el, target)) {
+									result.push(el[target]);
+									//console.log('this HAZ the target', el);
+								} else {
+									return loop.apply(this, _.union([root], [root[el]], [target]));
+									console.log('this HAZ NOT the target', el);
+								}*/
+								//return loop.apply(this, _.union([root], _.keys(root[el]), [target]));
+								
+								
+								/*if (root[el][target]) {
+									result.push(root[el][target]);
+								} else {
+									console.log('object but not target');
+								}*/
+								
+							/* else {
+								console.log(root[el]);
 								if (_.isObject(el) && _.has(el, target)) {
 									result.push(el[target]);
+								} else {
+									console.log('object but not target', el);
 								}
-							}
+							}*/
 						});
 						if (result.length > 0) {
 							return result;
@@ -78,6 +201,9 @@
 						context['config'].rows.cells
 					)
 				];
+				
+				
+				
 				
 				
 			}(this);
