@@ -105,6 +105,11 @@
         
         return this;
       };
+			flatten.prototype.render = function(format){
+				if (format == 'csv') {
+					console.log(this.table.join('\n'));
+				}
+			};
       
       
       function parse() {
@@ -162,7 +167,7 @@
         return loop.apply(this, arguments);
       }
       
-      var data = new flatten(context['data'], {
+      context['parsed'] = new flatten(context['data'], {
         cols: {
           index: '"interval"',
           cells: 'value -> page'
@@ -173,8 +178,8 @@
         }
       });
       
-      console.log('Raw', data.raw);
-      console.log('Table', data.table);
+      console.log('Raw', context['parsed'].raw);
+      console.log('Table', context['parsed'].table);
       
    }(this);
   </script>
