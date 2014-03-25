@@ -87,20 +87,27 @@
           cells: setup.rows.cells.split(" -> ")
         };
         self.table = [];
+				self.series = [];
         self.raw = root;
         
-        // Header
-        (function(table){
+        // Header (Series)
+        (function(){
           var index = [self.cols.index];
           var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
-          table.push(index.concat(cells));
-        })(self.table);
+          self.table.push(index.concat(cells));
+					_.each(cells, function(el, index){
+						self.series.push({ title: el, value: [] });
+					});
+        })();
         
         // Rows
-        _.each(root, function(el,index){
+        _.each(root, function(el, i){
           var index = parse.apply(self, [el].concat(self.rows.index));
           var cells = parse.apply(self, [el].concat(self.rows.cells));
           self.table.push(index.concat(cells));
+					_.each(self.series, function(series, j){
+						series['value'].push(cells[j]);
+					});
         });
         
         return this;
@@ -180,6 +187,7 @@
       
       console.log('Raw', context['parsed'].raw);
       console.log('Table', context['parsed'].table);
+			console.log('Series', context['parsed'].series);
       
    }(this);
   </script>
