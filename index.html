@@ -96,7 +96,7 @@
           var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
           self.table.push(index.concat(cells));
 					_.each(cells, function(el, index){
-						self.series.push({ title: el, value: [] });
+						self.series.push({ key: el, values: [] });
 					});
         })();
         
@@ -106,7 +106,7 @@
           var cells = parse.apply(self, [el].concat(self.rows.cells));
           self.table.push(index.concat(cells));
 					_.each(self.series, function(series, j){
-						series['value'].push(cells[j]);
+						series['values'].push(cells[j]);
 					});
         });
         
