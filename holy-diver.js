@@ -37,7 +37,7 @@ flatten.prototype.build = function(root, setup) {
   
   // Header (Series)
   (function(){
-    var index = [self.cols.index];
+    var index = self.cols.index;
     var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
     self.table.push(index.concat(cells));
     _each(cells, function(el, index){
