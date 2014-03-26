@@ -30,6 +30,7 @@ flatten.prototype.build = function(root, setup) {
     index: setup.rows.index.split(" -> "),
     cells: setup.rows.cells.split(" -> ")
   };
+  
   self.table = [];
   self.series = [];
   self.raw = root;
@@ -52,6 +53,16 @@ flatten.prototype.build = function(root, setup) {
     _each(self.series, function(series, j){
       series['values'].push(cells[j]);
     });
+    if (setup.rows.transform) {
+      for (var row in setup.rows.transform) {
+        if (self.table[i+1].length > row) {
+          self.table[i+1][row] = setup.rows.transform[row](self.table[i+1][row]);
+        }
+      }
+    }
+    console.log(self.table[i+1]);
+    
+    
   });
   
   return this;
@@ -71,18 +82,25 @@ function parse() {
     var target = args.pop();
     //console.log('DIVE ' + target + ':', root, args);
     
-    if (args.length == 0 && root instanceof Array) {
-      args = root;
+    if (args.length == 0) {
+      if (root instanceof Array) {
+        args = root;
+      } else if (typeof root === 'object') {
+        args.push(root);
+      }
     }
     
     _each(args, function(el, index, list){
       
-      if (el[target] || el[target] == 0) {
+      if (el[target] || el[target] == 0 || el[target] !== void 0) {
         // Easy grab!
-        return result.push(el[target]);
+        if (el[target] == null) {
+          return result.push('');
+        } else {
+          return result.push(el[target]);
+        }
         
       } else if (root[el]){
-        
         if (root[el] instanceof Array) {
           // dive through each array item
           _each(root[el], function(n, i) {
