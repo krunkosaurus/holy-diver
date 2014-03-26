@@ -89,6 +89,11 @@
         console.log('Tweets as series', window.tweets.series);
         console.log('------------------');
 				
+				
+				var mixed = window.keen2.append(tweets.series[0], {
+					match: "timeframe"
+				});
+				
 				/*
 				var mixed = window.keen2.append(tweets, 1, function(prev, value){
 					console.log(prev, value);

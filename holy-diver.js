@@ -53,6 +53,11 @@ flatten.prototype.build = function(root, setup) {
     self.table.push(index.concat(cells));
     _each(self.series, function(series, j){
       series['values'].push(cells[j]);
+      _each(cells[j], function(cell, k){
+        var output = {};
+        output[self.cols.label] = ''
+        series['values'].push(output);
+      });
     });
     if (setup.rows.transform) {
       for (var row in setup.rows.transform) {
@@ -69,9 +74,18 @@ flatten.prototype.build = function(root, setup) {
   return this;
 };
 
-/*
-flatten.prototype.append = function(invader, index, transform){
+
+flatten.prototype.append = function(series, config){
   var target = this.table;
+  _each(target, function(row, i){
+    if (i == 0) {
+      el.push(series.key);
+    } else {
+      
+    }
+    
+  });
+  /*
   _each(target, function(el, i){
     if (i == 0) {
       el.push(invader.table[0][index])
@@ -84,9 +98,9 @@ flatten.prototype.append = function(invader, index, transform){
         el[target[0].length-1] = el[target[0].length-1] || '';
       }
     });
-  });
+  });*/
   return this;
-};*/
+};
 
 flatten.prototype.render = function(format){
   if (format == 'csv') {
