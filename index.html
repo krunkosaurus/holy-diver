@@ -19,7 +19,7 @@
         
         var keen = new flatten(data.result, {
           cols: {
-            index: '',
+            label: 'Date',
             cells: 'value -> page'
           },
           rows: {
@@ -42,7 +42,7 @@
         
         var keen = new flatten(data.result, {
           cols: {
-            index: '',
+            label: 'Date',
             cells: 'value -> parsed_user_agent.os.family'
           },
           rows: {
@@ -69,7 +69,7 @@
         
         var tweets = new flatten(data, {
           cols: {
-            index: '',
+            label: 'Date',
             cells: 'user -> screen_name'
           },
           rows: {

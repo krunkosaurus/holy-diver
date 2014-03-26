@@ -23,7 +23,7 @@ function flatten(root, setup) {
 flatten.prototype.build = function(root, setup) {
   var self = this;
   self.cols = {
-    index: setup.cols.index.split(" -> "),
+    label: setup.cols.label.split(" -> "),
     cells: setup.cols.cells.split(" -> ")
   };
   self.rows = {
@@ -37,12 +37,13 @@ flatten.prototype.build = function(root, setup) {
   
   // Header (Series)
   (function(){
-    var index = self.cols.index;
+    var label = self.cols.label;
     var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
-    self.table.push(index.concat(cells));
+    self.table.push(label.concat(cells));
     _each(cells, function(el, index){
       self.series.push({ key: el, values: [] });
     });
+    console.log(self.table[0]);
   })();
   
   // Rows
