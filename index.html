@@ -40,7 +40,7 @@
       
       $.getJSON("http://localhost:8000/sample-data/keen2.json", function(data) {
         
-        var keen = new flatten(data.result, {
+        window.keen2 = new flatten(data.result, {
           cols: {
             label: 'Date',
             cells: 'value -> parsed_user_agent.os.family'
@@ -56,9 +56,9 @@
           }
         });
         
-        console.log('Keen IO #2 raw response', keen.raw);
-        console.log('Keen IO #2 as table', keen.table);
-        console.log('Keen IO #2 as series', keen.series);
+        console.log('Keen IO #2 raw response', window.keen2.raw);
+        console.log('Keen IO #2 as table', window.keen2.table);
+        console.log('Keen IO #2 as series', window.keen2.series);
         console.log('------------------');
       });
       
@@ -67,7 +67,7 @@
       
       $.getJSON("http://localhost:8000/sample-data/twitter.json", function(data) {
         
-        var tweets = new flatten(data, {
+        window.tweets = new flatten(data, {
           cols: {
             label: 'Date',
             cells: 'user -> screen_name'
@@ -84,10 +84,18 @@
           }
         });
 				
-        console.log('Tweets raw response', tweets.raw);
-        console.log('Tweets as table', tweets.table);
-        console.log('Tweets as series', tweets.series);
+        console.log('Tweets raw response', window.tweets.raw);
+        console.log('Tweets as table', window.tweets.table);
+        console.log('Tweets as series', window.tweets.series);
         console.log('------------------');
+				
+				/*
+				var mixed = window.keen2.append(tweets, 1, function(prev, value){
+					console.log(prev, value);
+					return (prev == void 0) ? [value] : prev.push(value);
+				});
+				console.log(mixed.render('csv'));*/
+
       });
       
     });

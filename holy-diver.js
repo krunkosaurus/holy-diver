@@ -68,10 +68,31 @@ flatten.prototype.build = function(root, setup) {
   
   return this;
 };
+
+/*
+flatten.prototype.append = function(invader, index, transform){
+  var target = this.table;
+  _each(target, function(el, i){
+    if (i == 0) {
+      el.push(invader.table[0][index])
+    }
+    _each(invader.table, function(n, j){
+      if (i > 0 && j > 0 && el[0] == n[0]) {
+        el[target[0].length-1] = el[target[0].length-1] || undefined;
+        el[target[0].length-1] = transform(el[target[0].length-1], n[index]);
+      } else {
+        el[target[0].length-1] = el[target[0].length-1] || '';
+      }
+    });
+  });
+  return this;
+};*/
+
 flatten.prototype.render = function(format){
   if (format == 'csv') {
     console.log(this.table.join('\n'));
   }
+  return this;
 };
 
 
