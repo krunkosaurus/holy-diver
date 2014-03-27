@@ -1,3 +1,9 @@
+/*! 
+  * ----------------
+  * HOLY DIVER!
+  * ----------------
+  */
+
 // by underscore.js!
 var _each = function(obj, iterator, context) {
   if (obj == null) return obj;
@@ -22,6 +28,7 @@ function flatten(root, setup) {
 
 flatten.prototype.build = function(root, setup) {
   var self = this;
+  
   self.cols = {
     label: setup.cols.label.split(" -> "),
     cells: setup.cols.cells.split(" -> ")
@@ -30,59 +37,147 @@ flatten.prototype.build = function(root, setup) {
     index: setup.rows.index.split(" -> "),
     cells: setup.rows.cells.split(" -> ")
   };
+  self.sort = {
+    rows: (setup.sort.rows) ? setup.sort.rows.split(":") : false,
+    cols: (setup.sort.cols) ? setup.sort.cols.split(":") : false
+  };
   
   self.table = [];
   self.series = [];
   self.raw = root;
-    
-  // Header (Series)
+  
+  
+  // SORT ROWS
+  // ---------------------
+  
+  if (self.sort.rows.length > 0) {
+    root.sort(function(a, b){
+      var a_index = parse.apply(self, [a].concat(self.rows.index));
+      var b_index = parse.apply(self, [b].concat(self.rows.index));
+      
+      if (self.sort.rows[1] == 'asc') {
+        if (a_index > b_index) return 1;
+        if (a_index < b_index) return -1;
+        return 0;
+      } else {
+        if (a_index > b_index) return -1;
+        if (a_index < b_index) return 1;
+        return 0;
+      }
+      console.log("2014-01-19T07:00:00.000Z" > "2014-03-16T07:00:00.000Z");
+      return false;
+      if (a_index > b_index) return 1;
+      if (b_index < a_index) return -1;
+      return 0;
+    })
+  }
+  
+  
+  // ADD SERIES
+  // ---------------------
+  
   (function(){
     var label = self.cols.label;
     var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
-    self.table.push(label.concat(cells));
-    
-    if (setup.cols.transform) {
-      for (var col in setup.cols.transform) {
-        if (self.table[0].length > col) {
-          self.table[0][col] = setup.cols.transform[col](self.table[0][col]);
-        }
-      }
-    }
-    
     _each(cells, function(el, index){
       self.series.push({ key: el, values: [] });
     });
+    
     // console.log(self.table[0]);
   })();
   
-  // Rows
+  
+  // ADD SERIES' RECORDS
+  // ---------------------
+  
   _each(root, function(el, i){
     var index = parse.apply(self, [el].concat(self.rows.index));
     var cells = parse.apply(self, [el].concat(self.rows.cells));
-    self.table.push(index.concat(cells));
-    
-    if (setup.rows.transform) {
-      for (var row in setup.rows.transform) {
-        if (self.table[i+1].length > row) {
-          self.table[i+1][row] = setup.rows.transform[row](self.table[i+1][row]);
+    _each(cells, function(cell, j){
+      var output = {};
+      output[self.cols.label] = index;
+      output['value'] = cell;
+      self.series[j]['values'].push(output);
+    })
+  })
+  
+  
+  // SORT COLUMNS
+  // ---------------------
+  
+  if (self.sort.cols.length > 0) {
+
+    self.series = self.series.sort(function(a, b){
+      var a_total = 0;
+      var b_total = 0;
+      _each(a.values, function(record, index){
+        a_total += record['value'];
+      })
+      _each(b.values, function(record, index){
+        b_total += record['value'];
+      })
+      
+      if (self.sort.cols[1] == 'asc') {
+        return a_total - b_total;
+      } else {
+        return b_total - a_total;
+      }
+    })
+  }
+  
+  
+  // BUILD TABLE
+  // ---------------------
+  
+  self.table = [];
+  self.table.push(self.cols.label);
+  
+  _each(self.series[0].values, function(value, index){
+    self.table.push(value[self.cols.label[0]]);
+  })
+  
+  _each(self.series, function(series, index){
+    self.table[0].push(series.key);
+    _each(series.values, function(record, j){
+      self.table[j+1].push(record['value']);
+    })
+  })
+  
+  
+  // COLUMN TRANSFORMS
+  // ---------------------
+  
+  if (setup.cols.transform) {
+    for (var transform in setup.cols.transform) {
+      if (typeof transform == 'number') {
+        if (self.table[0].length > col) {
+          self.table[0][transform] = setup.cols.transform[transform](self.table[0][transform]);
         }
+      } else if (transform == 'all') {
+        _each(self.table[0], function(column, index){
+          if (index > 0) {
+            self.table[0][index] = setup.cols.transform[transform](self.table[0][index]);
+          }
+        })
       }
     }
-    
-    _each(self.series, function(series, j){
-      //series['values'].push(cells[j]);
-      _each(cells, function(cell, k){
-        var output = {};
-        output[self.cols.label] = self.table[i+1][0];
-        output['value'] = cell;
-        series['values'].push(output);
-      });
-    });
-    
-    // console.log(self.table[i+1]);
-    
-    
-  });
+  }
+  
+  
+  // ROW TRANSFORMS
+  // ---------------------
+  
+  if (setup.rows.transform) {
+    _each(self.table, function(row, index){
+      if (index > 0) {
+        for (var transform in setup.rows.transform) {
+          self.table[index][transform] = setup.rows.transform[transform](self.table[index][transform]);
+        }
+      }
+    })
+  }
+  
+  //console.log(self.table);
   
   return this;
 };
@@ -111,16 +206,16 @@ flatten.prototype.build = function(root, setup) {
 };
 // EXAMPLE
 window.mixed = window.keen.blend(keen2, {
-	match: function(index, values) {
-		console.log(index, values);
-		var counter = 0;
-		for (var i = 0; i < values.length; i++) {
-			if (index.getUTCMonth() == values[i].date.getUTCMonth()) {
-				counter++;
-			}
-		}
-		return counter;
-	}
+  match: function(index, values) {
+    console.log(index, values);
+    var counter = 0;
+    for (var i = 0; i < values.length; i++) {
+      if (index.getUTCMonth() == values[i].date.getUTCMonth()) {
+        counter++;
+      }
+    }
+    return counter;
+  }
 });
 
 */
@@ -145,6 +240,7 @@ flatten.prototype.render = function(format){
 
 
 function parse() {
+  var self = this;
   var result = [];
   var loop = function() {
     var root = arguments[0];
@@ -173,6 +269,7 @@ function parse() {
       } else if (root[el]){
         if (root[el] instanceof Array) {
           // dive through each array item
+          
           _each(root[el], function(n, i) {
             var splinter = [root[el]].concat(root[el][i]).concat(args.slice(1)).concat(target);
             return loop.apply(this, splinter);
