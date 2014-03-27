@@ -34,7 +34,7 @@ flatten.prototype.build = function(root, setup) {
   self.table = [];
   self.series = [];
   self.raw = root;
-  
+    
   // Header (Series)
   (function(){
     var label = self.cols.label;
