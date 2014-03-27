@@ -40,10 +40,19 @@ flatten.prototype.build = function(root, setup) {
     var label = self.cols.label;
     var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
     self.table.push(label.concat(cells));
+    
+    if (setup.cols.transform) {
+      for (var col in setup.cols.transform) {
+        if (self.table[0].length > col) {
+          self.table[0][col] = setup.cols.transform[col](self.table[0][col]);
+        }
+      }
+    }
+    
     _each(cells, function(el, index){
       self.series.push({ key: el, values: [] });
     });
-    console.log(self.table[0]);
+    // console.log(self.table[0]);
   })();
   
   // Rows
@@ -70,7 +79,7 @@ flatten.prototype.build = function(root, setup) {
       });
     });
     
-    console.log(self.table[i+1]);
+    // console.log(self.table[i+1]);
     
     
   });
@@ -78,17 +87,54 @@ flatten.prototype.build = function(root, setup) {
   return this;
 };
 
+/*flatten.prototype.blend = function(that, config){
+  var self = this;
+  var options = config || {};
+  var invader = (options.series) ? [that.series[options.series]] : that.series;
+  
+  // var isDate = toString.call(obj) == '[object ' + name + ']';
+  _each(self.table, function(row, row_inc){
+    var index = row[0];
+    _each(invader, function(series, series_inc){
+      if (row_inc == 0) {
+        row.push(series.key);
+        self.series.push(series);
+      } else {
+        row.push(options.match(row[0], series.values));
+      }
+    });
+  });
+  _each(invader, function(series, series_inc){
+      
+  });
+  return self;
+};
+// EXAMPLE
+window.mixed = window.keen.blend(keen2, {
+	match: function(index, values) {
+		console.log(index, values);
+		var counter = 0;
+		for (var i = 0; i < values.length; i++) {
+			if (index.getUTCMonth() == values[i].date.getUTCMonth()) {
+				counter++;
+			}
+		}
+		return counter;
+	}
+});
 
-flatten.prototype.append = function(series, transform){
+*/
+
+/*flatten.prototype.append = function(series, options){
   _each(this.table, function(row, i){
     if (i == 0) {
       row.push(series.key);
     } else {
-      row.push(transform(row, series.values));
+      row.push(options.transform(row, series.values));
     }
   });
   return this;
-};
+};*/
 
 flatten.prototype.render = function(format){
   if (format == 'csv') {

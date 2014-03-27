@@ -17,20 +17,25 @@
       
       $.getJSON("http://localhost:8000/sample-data/keen.json", function(data) {
         
-        var keen = new flatten(data.result, {
+        window.keen = new flatten(data.result, {
           cols: {
             label: 'date',
             cells: 'value -> page'
           },
           rows: {
             index: 'timeframe -> start',
-            cells: 'value -> result -> number -> value'
+            cells: 'value -> result -> number -> value',
+						transform: {
+              0: function(value){
+                return new Date(value); //.getUTCMonth() + "/" + new Date(value).getUTCFullYear();
+              }
+            }
           }
         });
         
-        console.log('Keen IO raw response', keen.raw);
-        console.log('Keen IO as table', keen.table);
-        console.log('Keen IO as series', keen.series);
+        console.log('Keen IO raw response', window.keen.raw);
+        console.log('Keen IO as table', window.keen.table);
+        console.log('Keen IO as series', window.keen.series);
         console.log('------------------');
       });
       
@@ -70,7 +75,12 @@
         window.tweets = new flatten(data, {
           cols: {
             label: 'date',
-            cells: 'user -> screen_name'
+            cells: 'user -> screen_name',
+						transform: {
+							1: function(value){
+								return '@' + value;
+							}
+						}
           },
           rows: {
             index: 'created_at',
@@ -79,36 +89,16 @@
               0: function(value){
                 var date = new Date(Date.parse(value.replace(/( +)/, ' UTC$1')));
                 return date;
-								//return date.getUTCMonth() + "/" + date.getUTCFullYear();
               }
             }
           }
         });
-				
+        
         console.log('Tweets raw response', window.tweets.raw);
         console.log('Tweets as table', window.tweets.table);
         console.log('Tweets as series', window.tweets.series);
         console.log('------------------');
-				
-				
-
-				// Keen IO #2 + Twitter Sample
-      	// -------------------------------
-				
-				var mixed = window.keen2.append(tweets.series[0], function(row, values) {
-					var counter = 0;
-					for (var i = 0; i < values.length; i++) {
-						if (row[0].getUTCMonth() == values[i].date.getUTCMonth()) {
-							counter++;
-						}
-					}
-					return counter;
-				});
-				
-				console.log(mixed.table);
-				console.log(mixed.render('csv'));
-				/**/
-
+        
       });
       
     });
