@@ -19,7 +19,7 @@
         
         var keen = new flatten(data.result, {
           cols: {
-            label: 'Date',
+            label: 'date',
             cells: 'value -> page'
           },
           rows: {
@@ -42,7 +42,7 @@
         
         window.keen2 = new flatten(data.result, {
           cols: {
-            label: 'Date',
+            label: 'date',
             cells: 'value -> parsed_user_agent.os.family'
           },
           rows: {
@@ -50,7 +50,7 @@
             cells: 'value -> result',
             transform: {
               0: function(value){
-                return new Date(value).getUTCMonth() + "/" + new Date(value).getUTCFullYear();
+                return new Date(value); //.getUTCMonth() + "/" + new Date(value).getUTCFullYear();
               }
             }
           }
@@ -69,7 +69,7 @@
         
         window.tweets = new flatten(data, {
           cols: {
-            label: 'Date',
+            label: 'date',
             cells: 'user -> screen_name'
           },
           rows: {
@@ -78,7 +78,8 @@
             transform: {
               0: function(value){
                 var date = new Date(Date.parse(value.replace(/( +)/, ' UTC$1')));
-                return date.getUTCMonth() + "/" + date.getUTCFullYear();
+                return date;
+								//return date.getUTCMonth() + "/" + date.getUTCFullYear();
               }
             }
           }
@@ -90,16 +91,23 @@
         console.log('------------------');
 				
 				
-				var mixed = window.keen2.append(tweets.series[0], {
-					match: "timeframe"
+
+				// Keen IO #2 + Twitter Sample
+      	// -------------------------------
+				
+				var mixed = window.keen2.append(tweets.series[0], function(row, values) {
+					var counter = 0;
+					for (var i = 0; i < values.length; i++) {
+						if (row[0].getUTCMonth() == values[i].date.getUTCMonth()) {
+							counter++;
+						}
+					}
+					return counter;
 				});
 				
-				/*
-				var mixed = window.keen2.append(tweets, 1, function(prev, value){
-					console.log(prev, value);
-					return (prev == void 0) ? [value] : prev.push(value);
-				});
-				console.log(mixed.render('csv'));*/
+				console.log(mixed.table);
+				console.log(mixed.render('csv'));
+				/**/
 
       });
       

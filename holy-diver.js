@@ -51,14 +51,7 @@ flatten.prototype.build = function(root, setup) {
     var index = parse.apply(self, [el].concat(self.rows.index));
     var cells = parse.apply(self, [el].concat(self.rows.cells));
     self.table.push(index.concat(cells));
-    _each(self.series, function(series, j){
-      series['values'].push(cells[j]);
-      _each(cells[j], function(cell, k){
-        var output = {};
-        output[self.cols.label] = ''
-        series['values'].push(output);
-      });
-    });
+    
     if (setup.rows.transform) {
       for (var row in setup.rows.transform) {
         if (self.table[i+1].length > row) {
@@ -66,6 +59,17 @@ flatten.prototype.build = function(root, setup) {
         }
       }
     }
+    
+    _each(self.series, function(series, j){
+      //series['values'].push(cells[j]);
+      _each(cells, function(cell, k){
+        var output = {};
+        output[self.cols.label] = self.table[i+1][0];
+        output['value'] = cell;
+        series['values'].push(output);
+      });
+    });
+    
     console.log(self.table[i+1]);
     
     
@@ -75,30 +79,14 @@ flatten.prototype.build = function(root, setup) {
 };
 
 
-flatten.prototype.append = function(series, config){
-  var target = this.table;
-  _each(target, function(row, i){
+flatten.prototype.append = function(series, transform){
+  _each(this.table, function(row, i){
     if (i == 0) {
-      el.push(series.key);
+      row.push(series.key);
     } else {
-      
+      row.push(transform(row, series.values));
     }
-    
   });
-  /*
-  _each(target, function(el, i){
-    if (i == 0) {
-      el.push(invader.table[0][index])
-    }
-    _each(invader.table, function(n, j){
-      if (i > 0 && j > 0 && el[0] == n[0]) {
-        el[target[0].length-1] = el[target[0].length-1] || undefined;
-        el[target[0].length-1] = transform(el[target[0].length-1], n[index]);
-      } else {
-        el[target[0].length-1] = el[target[0].length-1] || '';
-      }
-    });
-  });*/
   return this;
 };
 
