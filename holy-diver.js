@@ -37,9 +37,9 @@ flatten.prototype.build = function(root, setup) {
     index: setup.rows.index.split(" -> "),
     cells: setup.rows.cells.split(" -> ")
   };
-  self.sort = {
-    rows: (setup.sort.rows) ? setup.sort.rows.split(":") : false,
-    cols: (setup.sort.cols) ? setup.sort.cols.split(":") : false
+  self.order = {
+    rows: (setup.order && setup.order.rows) ? setup.order.rows.split(":") : false,
+    cols: (setup.order && setup.order.cols) ? setup.order.cols.split(":") : false
   };
   
   self.table = [];
@@ -50,12 +50,12 @@ flatten.prototype.build = function(root, setup) {
   // SORT ROWS
   // ---------------------
   
-  if (self.sort.rows.length > 0) {
+  if (self.order.rows.length > 0) {
     root.sort(function(a, b){
       var a_index = parse.apply(self, [a].concat(self.rows.index));
       var b_index = parse.apply(self, [b].concat(self.rows.index));
       
-      if (self.sort.rows[1] == 'asc') {
+      if (self.order.rows[1] == 'asc') {
         if (a_index > b_index) return 1;
         if (a_index < b_index) return -1;
         return 0;
@@ -82,8 +82,6 @@ flatten.prototype.build = function(root, setup) {
     _each(cells, function(el, index){
       self.series.push({ key: el, values: [] });
     });
-    
-    // console.log(self.table[0]);
   })();
   
   
@@ -105,8 +103,7 @@ flatten.prototype.build = function(root, setup) {
   // SORT COLUMNS
   // ---------------------
   
-  if (self.sort.cols.length > 0) {
-
+  if (self.order.cols.length > 0) {
     self.series = self.series.sort(function(a, b){
       var a_total = 0;
       var b_total = 0;
@@ -117,7 +114,7 @@ flatten.prototype.build = function(root, setup) {
         b_total += record['value'];
       })
       
-      if (self.sort.cols[1] == 'asc') {
+      if (self.order.cols[1] == 'asc') {
         return a_total - b_total;
       } else {
         return b_total - a_total;
@@ -149,16 +146,17 @@ flatten.prototype.build = function(root, setup) {
   
   if (setup.cols.transform) {
     for (var transform in setup.cols.transform) {
-      if (typeof transform == 'number') {
-        if (self.table[0].length > col) {
-          self.table[0][transform] = setup.cols.transform[transform](self.table[0][transform]);
-        }
-      } else if (transform == 'all') {
+      if (transform == 'all') {
         _each(self.table[0], function(column, index){
           if (index > 0) {
             self.table[0][index] = setup.cols.transform[transform](self.table[0][index]);
           }
         })
+      } else {
+        transform = parseInt(transform);
+        if (self.table[0].length > transform) {
+          self.table[0][transform] = setup.cols.transform[transform](self.table[0][transform]);
+        }
       }
     }
   }
@@ -177,59 +175,8 @@ flatten.prototype.build = function(root, setup) {
     })
   }
   
-  //console.log(self.table);
-  
   return this;
 };
-
-/*flatten.prototype.blend = function(that, config){
-  var self = this;
-  var options = config || {};
-  var invader = (options.series) ? [that.series[options.series]] : that.series;
-  
-  // var isDate = toString.call(obj) == '[object ' + name + ']';
-  _each(self.table, function(row, row_inc){
-    var index = row[0];
-    _each(invader, function(series, series_inc){
-      if (row_inc == 0) {
-        row.push(series.key);
-        self.series.push(series);
-      } else {
-        row.push(options.match(row[0], series.values));
-      }
-    });
-  });
-  _each(invader, function(series, series_inc){
-      
-  });
-  return self;
-};
-// EXAMPLE
-window.mixed = window.keen.blend(keen2, {
-  match: function(index, values) {
-    console.log(index, values);
-    var counter = 0;
-    for (var i = 0; i < values.length; i++) {
-      if (index.getUTCMonth() == values[i].date.getUTCMonth()) {
-        counter++;
-      }
-    }
-    return counter;
-  }
-});
-
-*/
-
-/*flatten.prototype.append = function(series, options){
-  _each(this.table, function(row, i){
-    if (i == 0) {
-      row.push(series.key);
-    } else {
-      row.push(options.transform(row, series.values));
-    }
-  });
-  return this;
-};*/
 
 flatten.prototype.render = function(format){
   if (format == 'csv') {
