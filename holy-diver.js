@@ -30,9 +30,11 @@ flatten.prototype.build = function(root, setup) {
   var self = this;
   
   self.cols = {
-    label: setup.cols.label.split(" -> "),
-    cells: setup.cols.cells.split(" -> ")
+    label: (setup.cols.label) ? setup.cols.label.split(" -> ") : false,
+    cells: (setup.cols.cells) ? setup.cols.cells.split(" -> ") : false,
+    fixed: (setup.cols.fixed) ? setup.cols.fixed : false
   };
+  
   self.rows = {
     index: setup.rows.index.split(" -> "),
     cells: setup.rows.cells.split(" -> ")
@@ -77,11 +79,28 @@ flatten.prototype.build = function(root, setup) {
   // ---------------------
   
   (function(){
-    var label = self.cols.label;
-    var cells = parse.apply(self, [root[0]].concat(self.cols.cells));
-    _each(cells, function(el, index){
+    
+    self.cols.label = (self.cols.fixed) ? self.cols.fixed[0] : 'series';
+    var fixed = (self.cols.fixed) ? self.cols.fixed : [];
+    var cells = (self.cols.cells) ? parse.apply(self, [root[0]].concat(self.cols.cells)) : [];
+    
+    /*
+    if (self.cols.fixed) {
+      fixed = self.cols.fixed;
+      self.cols.label = fixed[0];
+    }
+    if (self.cols.cells) {
+      cells = parse.apply(self, [root[0]].concat(self.cols.cells));
+    }*/
+    
+    //
+    var output = fixed.concat(cells);
+        output.splice(0,1);
+    
+    _each(output, function(el, index){
       self.series.push({ key: el, values: [] });
     });
+    //console.log(output, self.series);
   })();
   
   
@@ -91,9 +110,10 @@ flatten.prototype.build = function(root, setup) {
   _each(root, function(el, i){
     var index = parse.apply(self, [el].concat(self.rows.index));
     var cells = parse.apply(self, [el].concat(self.rows.cells));
+    
     _each(cells, function(cell, j){
       var output = {};
-      output[self.cols.label] = index;
+      output[self.cols.label] = index[0];
       output['value'] = cell;
       self.series[j]['values'].push(output);
     })
@@ -127,10 +147,10 @@ flatten.prototype.build = function(root, setup) {
   // ---------------------
   
   self.table = [];
-  self.table.push(self.cols.label);
+  self.table.push([self.cols.label]);
   
   _each(self.series[0].values, function(value, index){
-    self.table.push(value[self.cols.label[0]]);
+    self.table.push([value[self.cols.label]]);
   })
   
   _each(self.series, function(series, index){

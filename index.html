@@ -10,8 +10,41 @@
       // Start a web server
       // python -m SimpleHTTPServer
       // -------------------------------
+			
+			
+			// Github Traffic Data (keen-js)
+      // -------------------------------
       
-      
+      $.getJSON("http://localhost:8000/sample-data/git-traffic-data.json", function(data) {
+        console.log(data);
+				
+        window.git = new flatten(data.counts, {
+					cols: {
+						fixed: ['date', 'count']
+					},
+          rows: {
+            index: 'bucket',
+            cells: 'total',
+						transform: {
+              0: function(value){
+                return new Date(value);
+              }
+            }
+          },
+					order: {
+						rows: 'date:desc'
+					}
+        });
+        
+        console.log('Github Traffic raw response', window.git.raw);
+        console.log('Github Traffic as table', window.git.table);
+        console.log('Github Traffic as series', window.git.series);
+        console.log('------------------');
+      });
+
+
+
+
       // Keen IO Sample #1
       // -------------------------------
       
@@ -19,7 +52,8 @@
         
         window.keen = new flatten(data.result, {
           cols: {
-            label: 'date',
+            //label: 'date',
+						fixed: ['date'],
             cells: 'value -> page'
           },
           rows: {
@@ -47,7 +81,7 @@
         
         window.keen2 = new flatten(data.result, {
           cols: {
-            label: 'date',
+            fixed: ['date'],
             cells: 'value -> parsed_user_agent.os.family',
 						transform: {
 							0: function(value){
@@ -79,7 +113,7 @@
         
         window.tweets = new flatten(data, {
           cols: {
-            label: 'date',
+            fixed: ['date'],
             cells: 'user -> screen_name',
 						transform: {
 							1: function(value){
@@ -92,6 +126,7 @@
             cells: 'text',
             transform: {
               0: function(value){
+								console.log('value', value);
                 var date = new Date(Date.parse(value.replace(/( +)/, ' UTC$1')));
                 return date.getUTCMonth() + '/' + date.getUTCDate();
               }
